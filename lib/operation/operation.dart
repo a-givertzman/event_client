@@ -1,15 +1,11 @@
 import 'dart:convert';
 
+import 'package:event_client/operation/operation_actions.dart';
 import 'package:event_client/operation/operation_id.dart';
+import 'package:event_client/operation/operation_render.dart';
 import 'package:flutter/material.dart';
 import 'package:hmi_core/hmi_core_log.dart';
 
-///
-/// Интерфейс для [Operation] что бы вкрнуть простейшие виджеты
-abstract class ToWidget {
-  /// Возвращает простейший виджет по умолчанию для данного объекта
-  Widget toWidget(BuildContext context);
-}
 /// 
 /// Центральная точка входа в преобразование байтов во `frame` в доменный типы.
 /// 
@@ -64,7 +60,7 @@ sealed class Operation {
 }
 ///
 /// [Operation]'s empty variant
-final class OperationEmpty extends Operation implements ToWidget {
+final class OperationEmpty extends Operation implements OperationRender {
   final OperationId _operationId;
   const OperationEmpty(OperationId operationId):
     _operationId = operationId,
@@ -76,13 +72,13 @@ final class OperationEmpty extends Operation implements ToWidget {
   }
   //
   @override
-  Widget toWidget(BuildContext context) {
+  Widget render(BuildContext context, {OperationActions actions}) {
     return Text("OperationEmpty | Empty object for '$_operationId'");
   }
 }
 ///
 /// [Operation]'s parse errors container
-final class OperationFail extends Operation implements ToWidget {
+final class OperationFail extends Operation implements OperationRender {
   final String _err;
   const OperationFail(String err):
     _err = err,
@@ -94,7 +90,7 @@ final class OperationFail extends Operation implements ToWidget {
   }
   //
   @override
-  Widget toWidget(BuildContext context) {
+  Widget render(BuildContext context, {OperationActions actions}) {
     return Text(_err);
   }
 }
@@ -105,7 +101,7 @@ final class SysDiag extends Operation {
 }
 ///
 /// Temperature
-final class Temperature extends Operation implements ToWidget {
+final class Temperature extends Operation implements OperationRender {
   final Map<String, dynamic> _map;
   // const Temperature(double celsius): _celsius = celsius;
   Temperature.fromJsonMap(Map<String, dynamic> map): 
@@ -113,21 +109,21 @@ final class Temperature extends Operation implements ToWidget {
     super._();
   //
   @override
-  Widget toWidget(BuildContext context) {
-    return Text(_map['value'] ?? 'Temperature.toWidget | Missed field "value"');
+  Widget render(BuildContext context, {OperationActions actions}) {
+    return Text(_map['value'] ?? 'Temperature.render | Missed field "value"');
   }
 }
 ///
 /// Torque
-final class Torque extends Operation {
+final class Torque extends Operation implements OperationRender {
   final Map<String, dynamic> _map;
   Torque.fromJsonMap(Map<String, dynamic> map):
     _map = map,
     super._();
   //
   @override
-  Widget toWidget(BuildContext context) {
-    return Text(_map['value'] ?? 'Temperature.toWidget | Missed field "value"');
+  Widget render(BuildContext context, {OperationActions actions}) {
+    return Text(_map['value'] ?? 'Temperature.render | Missed field "value"');
   }
 }
 ///

@@ -30,14 +30,14 @@ class Frame {
   // };
   ///
   /// Returns the [Operation] corresponding to OperationId
-  T operation<T extends Operation>() {
+  Operation operation() {
     switch (content) {
       case Content.bytes:
-        return Operation.fromRawBytes(operationId, bytes) as T;
+        return Operation.fromRawBytes(operationId, bytes);
       case Content.empty:
-        return Operation.empty(operationId, bytes) as T;
+        return Operation.empty(operationId, bytes);
       case Content.json:
-        return Operation.fromJsonBytes(operationId, bytes) as T;
+        return Operation.fromJsonBytes(operationId, bytes);
     }
   }
 }

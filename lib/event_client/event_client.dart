@@ -28,6 +28,17 @@ class EventClient {
     }
     return controller.stream;
   }
+  Stream<T> stream<T extends Operation>(String path) {
+    final id = _resolveOperationId(path);
+
+    final expectedType = _operationTypeById[id];
+
+    if (expectedType != T) {
+      throw StateError(
+        'Path $path produces $expectedType but you requested $T'
+      );
+    }
+  }
   ///
   /// Listening to the events from the connection.
   void _listenConnection() {
