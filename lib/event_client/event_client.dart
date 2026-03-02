@@ -62,6 +62,16 @@ class EventClient {
     );
   }
   ///
+  /// Sends [operation] to the server.
+  void send(Operation operation) {
+    _message.add(operation);
+  }
+  ///
+  /// Requests [operation] from the server.
+  Future<T> request<T extends Operation>(Operation operation) {
+    return _message.request(operation);
+  }
+  ///
   /// Releases all resources.
   void close() {
     _message.close();
