@@ -38,6 +38,7 @@ abstract class Operation {
 - Отвечает за одну сущность.
 - Operation immutable и не изменяет своё внутреннее состояние после создания.
 - Мутация через Intent → backend round-trip.
+- Не содержит побочных эффектов (side-effect).
 - Не публикует сырые данные (`_map['key']` - приватна).
 - Ключи не хардкодятся вне Operation
 - Публикует поведение (методы, виджеты, 3d-сущности) - соответствующее сущщности.
@@ -80,7 +81,7 @@ abstract class Operation {
   - JitterEventRate (нагрузка при шуме/дребезге)
   - DeadStreamCount (утечки - потерянные подписки).
 - **Heartbeats Keep-alive**: ContentKind::Empty, Cot::Req - для поддержания TCP соединения
-- **Безопасность** (не MVP): Если это «голый» сокет, то стоит убедиться, что Size проверяется на сервере (чтобы не словить Buffer Overflow атаку, прислав Size = 2GB).
+- **Безопасность** (не MVP): Если это «голый» сокет, то стоит убедиться, что Size проверяется на сервере для защиты от ООМ/Dos.
 
 ---
 
@@ -90,7 +91,7 @@ abstract class Operation {
 
 - **Запрещено**: Менять `_map` внутри Operation's
 - **Запрещено** Вызывать Intent внутри render().
-- **Flow**: UI -> Operation.Intent -> Backend -> EventClient -> New Operation -> UI.
+- **Flow**: UI -> Intent(Operation) -> Backend -> EventClient -> New Operation -> UI.
 - **Типизация**: Известно какой тип мы ожидаем при Operation.intent(client).request()
   * Request декларирует ожидаемый тип ответа.
   * Финальная типизация производится Operation.factory на основании OperationId.
@@ -106,7 +107,7 @@ class OperationIntent<T extends Operation> {
     client.send(operation);
   }
 
-  Future<Operation> request() {
+  Future<T> request() {
     return client.request(operation);
   }
 }
@@ -115,9 +116,9 @@ class OperationIntent<T extends Operation> {
 Extension:
 
 ```dart
-extension OperationIntentExt on Operation {
-  OperationIntent intent(EventClient client) {
-    return OperationIntent(client, this);
+extension OperationIntentExt<T extends Operation> on T {
+  OperationIntent<T> intent(EventClient client) {
+    return OperationIntent<T>(client, this);
   }
 }
 ```
