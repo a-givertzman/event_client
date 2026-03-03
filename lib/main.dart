@@ -1,7 +1,21 @@
+import 'package:event_client/event_client/connect.dart';
+import 'package:event_client/event_client/event_client.dart';
+import 'package:event_client/event_client/event_provider.dart';
+import 'package:event_client/event_client/message.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  final client = EventClient(
+    message: Message(
+      connect: Connect(addr: '127.0.0.1:8085'),
+    ),
+  );
+  runApp(
+    EventClientProvider(
+      client: client,
+      child: const MyApp(),
+    )
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -109,6 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            ListWidget(),
           ],
         ),
       ),
@@ -118,5 +133,20 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+}
+
+
+class ListWidget extends StatefulWidget {
+  const ListWidget({super.key});
+
+  @override
+  State<ListWidget> createState() => _ListWidgetState();
+}
+
+class _ListWidgetState extends State<ListWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }

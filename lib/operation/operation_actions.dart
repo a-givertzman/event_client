@@ -1,8 +1,5 @@
 /// 
-/// Интерфейс, через который операция может вернуть активность пользователя:
+/// Интерфейс классов, хранящих активности пользователя для `Operation`:
 /// «Меня нажали / изменили".
 /// 
-/// Это сохраняет твою Operation независимой и тестируемой от глобального состояния приложения.
-abstract class OperationActions {
-  void onChanged(int operationId, String eventId, dynamic payload);
-}
+abstract class OperationActions {}

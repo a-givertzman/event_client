@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'package:event_client/event_client/message.dart';
 import 'package:event_client/operation/operation.dart';
+import 'package:event_client/operation/operation_id.dart';
 import 'package:hmi_core/hmi_core_log.dart';
 ///
 /// Provides subscription for the events from the network.
 class EventClient {
   final _log = const Log("EventClient");
   final Message _message;
-  final Map<String, Operation> _cache;
-  final Map<String, StreamController<Operation>> _subscriptions = {};
+  final Map<OperationId, Operation> _cache;
+  final Map<OperationId, StreamController<Operation>> _subscriptions = {};
   ///
   /// Creates a new instance of [EventClient] with incoming [message]
   EventClient({
@@ -19,25 +20,46 @@ class EventClient {
     _listenConnection();
   }
   ///
-  /// Returns a stream of [Operation] for a given subscription [name]. Creates a new stream if one doesn't exist.
-  Stream<Operation> stream(String name) {
-    final chached = _cache[name];
-    final controller = _subscriptions.putIfAbsent(name, () => StreamController<Operation>.broadcast());
-    if (chached != null) {
-      controller.add(chached);
-    }
-    return controller.stream;
-  }
-  Stream<T> stream<T extends Operation>(String path) {
-    final id = _resolveOperationId(path);
+  /// Returns a stream of [Operation] for a given subscription [path].
+  /// - Creates a new stream if one doesn't exist.
+  // Stream<T> stream<T extends Operation>(String path) {
+  //   final chached = _cache[path];
+  //   final controller = _subscriptions.putIfAbsent(path, () => StreamController<T>.broadcast());
+  //   if (controller is StreamController<T>) {
+  //     if (chached != null) {
+  //       controller.add(chached as T);
+  //     }
+  //     return controller.stream;
+  //   } else {
+  //     throw StateError(
+  //       'EventClient.stream | `$path` isn`t coresponds to the requested type `$T`'
+  //     );
+  //   }
+  // }
+  ///
+  /// Returns a stream of [Operation] for a given subscription [path].
+  /// - Creates a new stream if one doesn't exist.
+  Stream<Operation> stream(String path) {
+    final cached = _cache[path];
 
-    final expectedType = _operationTypeById[id];
+    final sub = _subscriptions.putIfAbsent(path, () {
+      return _TypedSubscription(
+        T,
+        StreamController<Operation>.broadcast(),
+      );
+    });
 
-    if (expectedType != T) {
+    if (sub.type != T) {
       throw StateError(
-        'Path $path produces $expectedType but you requested $T'
+        'EventClient.stream | `$path` already registered with type `${sub.type}`, requested `$T`'
       );
     }
+
+    if (cached != null) {
+      sub.controller.add(cached);
+    }
+
+    return sub.controller.stream.cast<T>();
   }
   ///
   /// Listening to the events from the connection.

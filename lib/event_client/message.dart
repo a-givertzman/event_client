@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:event_client/event_client/connect.dart';
-import 'package:event_client/domain/error/failure.dart';
 import 'package:event_client/domain/types/bytes.dart';
 import 'package:event_client/event_client/frame.dart';
 import 'package:hmi_core/hmi_core_log.dart';
